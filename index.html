@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Cardyes Provably Fair</title>
+  <link rel="icon" href="./favicon.ico" sizes="any">
   <style>
     :root {
       --page-max: 760px;
@@ -95,6 +96,11 @@
       min-width: 0;
     }
 
+    .brand-logo-link {
+      display: block;
+      flex: 0 0 auto;
+    }
+
     .brand-logo {
       display: block;
       width: 110px;
@@ -113,6 +119,39 @@
       margin: 2px 0 0;
       color: var(--color-muted);
       font: var(--text-body-4);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      flex: 0 0 auto;
+    }
+
+    .header-source-link {
+      min-width: 112px;
+      height: 34px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-pill);
+      padding: 0 12px;
+      color: var(--color-title);
+      background: rgba(32, 33, 36, 0.72);
+      font: var(--text-important-2);
+      text-align: center;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .header-source-link:hover {
+      color: #fff;
+      background: #3c3c3c;
+    }
+
+    .header-source-link:active {
+      transform: translateY(1px);
     }
 
     .page-scroll {
@@ -434,16 +473,6 @@
       font: var(--text-body-4);
     }
 
-    .bottom-bar {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
-      margin-top: 46px;
-      padding-top: 26px;
-      border-top: 1px solid var(--color-border-soft);
-    }
-
     .btn {
       min-width: 130px;
       height: 36px;
@@ -481,11 +510,6 @@
       background: var(--color-primary-press);
     }
 
-    .btn-secondary:hover {
-      color: #fff;
-      background: #3c3c3c;
-    }
-
     .btn:active {
       transform: translateY(1px);
     }
@@ -504,6 +528,12 @@
       .app-header {
         gap: 14px;
         padding-bottom: 28px;
+      }
+
+      .header-source-link {
+        min-width: 100px;
+        height: 32px;
+        padding: 0 10px;
       }
 
       .brand-logo {
@@ -546,29 +576,51 @@
 
       .app-header {
         align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 12px;
         padding-bottom: 22px;
       }
 
       .brand {
-        align-items: center;
-        flex-wrap: nowrap;
-        gap: 10px;
+        display: contents;
+      }
+
+      .brand-logo-link {
+        order: 1;
+        margin-top: 3px;
+      }
+
+      .header-actions {
+        order: 2;
+        margin-left: auto;
+      }
+
+      .brand-copy {
+        order: 3;
+        flex: 0 0 100%;
+        min-width: 0;
       }
 
       .brand-logo {
         width: auto;
         height: 24px;
-        flex: 0 0 auto;
-      }
-
-      .brand-copy {
-        flex: 1 1 auto;
-        min-width: 0;
       }
 
       .brand-name {
-        font-size: 18px;
-        line-height: 22px;
+        font-size: 22px;
+        line-height: 26px;
+      }
+
+      .brand-subtitle {
+        display: none;
+      }
+
+      .header-source-link {
+        min-width: 92px;
+        height: 30px;
+        padding: 0 9px;
+        font-size: 12px;
+        line-height: 15px;
       }
 
       .page-scroll {
@@ -604,17 +656,10 @@
         line-height: 18px;
       }
 
-      .bottom-bar {
-        display: flex;
-        margin-top: 26px;
-        padding-top: 20px;
-      }
-
       .check-row {
         justify-content: stretch;
       }
 
-      .btn,
       .btn-primary {
         width: 100%;
       }
@@ -625,11 +670,16 @@
   <main class="app-shell">
     <header class="app-header">
       <div class="brand" aria-label="Cardyes">
-        <img class="brand-logo" src="./logo.svg" alt="Cardyes">
+        <a class="brand-logo-link" href="https://cardyes.com" aria-label="Go to Cardyes">
+          <img class="brand-logo" src="./logo.svg" alt="Cardyes">
+        </a>
         <div class="brand-copy">
           <p class="brand-name">Verify your Rolls</p>
           <p class="brand-subtitle">Open-source provably fair verification</p>
         </div>
+      </div>
+      <div class="header-actions">
+        <a class="header-source-link" href="https://github.com/cardyes-com/provably-fair" target="_blank" rel="noreferrer">Source Code</a>
       </div>
     </header>
 
@@ -717,9 +767,6 @@
       </div>
     </section>
 
-    <footer class="bottom-bar">
-      <a class="btn btn-secondary" href="https://github.com/cardyes-com/provably-fair" target="_blank" rel="noreferrer">Source Code</a>
-    </footer>
   </main>
 
   <script>
