@@ -1,0 +1,926 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cardyes Provably Fair</title>
+  <style>
+    :root {
+      --page-max: 760px;
+      --radius-card: 12px;
+      --radius-pill: 8px;
+
+      --color-page: #151517;
+      --color-panel: #292a2d;
+      --color-panel-soft: #202124;
+      --color-input: #0f0f0f;
+      --color-border: rgba(220, 220, 220, 0.16);
+      --color-border-soft: rgba(220, 220, 220, 0.10);
+      --color-title: #f6f6f6;
+      --color-text: #dcdcdc;
+      --color-muted: #a2a0a0;
+      --color-code: #dcdcdc;
+      --color-primary: #c8f240;
+      --color-primary-hover: #e4ff7d;
+      --color-primary-press: #c1de50;
+      --color-success: #43b461;
+      --color-warning: #f4a200;
+      --color-error: #fd1c1c;
+
+      --shadow-panel: 0 18px 42px rgba(0, 0, 0, 0.26);
+      --shadow-focus: 0 0 4px rgba(255, 255, 255, 0.9);
+
+      --font-base: Inter, ui-sans-serif, sans-serif;
+      --font-mono: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+      --text-lead-2: 700 23px/28px var(--font-base);
+      --text-lead-3: 700 20px/24px var(--font-base);
+      --text-lead-4: 700 18px/22px var(--font-base);
+      --text-lead-5: 700 14px/17px var(--font-base);
+      --text-important-1: 700 16px/22px var(--font-base);
+      --text-important-2: 700 13px/16px var(--font-base);
+      --text-important-3: 700 12px/15px var(--font-base);
+      --text-important-4: 700 15px/20px var(--font-base);
+      --text-body-3: 400 15px/18px var(--font-base);
+      --text-body-4: 400 13px/20px var(--font-base);
+      --text-body-5: 400 12px/15px var(--font-base);
+      --text-code-2: 600 13px/20px var(--font-mono);
+      --text-code-3: 600 12px/18px var(--font-mono);
+      --text-code-5: 700 12px/15px var(--font-mono);
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      background:
+        radial-gradient(circle at 20% -18%, rgba(200, 242, 64, 0.12), transparent 280px),
+        radial-gradient(circle at 90% 12%, rgba(61, 174, 140, 0.08), transparent 280px),
+        linear-gradient(180deg, var(--color-panel-soft) 0%, var(--color-page) 36%, #0f0f0f 100%);
+      color: var(--color-text);
+      font-family: var(--font-base);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      overflow: auto;
+    }
+
+    .app-shell {
+      width: min(var(--page-max), calc(100% - 32px));
+      min-height: 100dvh;
+      margin: 0 auto;
+      padding: 42px 0 30px;
+    }
+
+    .app-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 0 0 34px;
+      border-bottom: 1px solid var(--color-border-soft);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .brand-logo {
+      display: block;
+      width: 110px;
+      height: 34px;
+      flex: 0 0 auto;
+    }
+
+    .brand-name {
+      margin: 0;
+      color: var(--color-title);
+      font: var(--text-lead-2);
+      letter-spacing: 0;
+    }
+
+    .brand-subtitle {
+      margin: 2px 0 0;
+      color: var(--color-muted);
+      font: var(--text-body-4);
+    }
+
+    .page-scroll {
+      padding: 42px 0 0;
+    }
+
+    .surface-card {
+      border-radius: var(--radius-card);
+      background: var(--color-panel);
+      box-shadow: var(--shadow-panel);
+      border: 1px solid var(--color-border);
+    }
+
+    .input-card {
+      position: relative;
+      padding: 28px 30px 26px;
+      overflow: hidden;
+    }
+
+    .input-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(135deg, rgba(200, 242, 64, 0.10), transparent 32%);
+      opacity: 0.75;
+    }
+
+    .input-card > * {
+      position: relative;
+    }
+
+    .field-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      color: var(--color-title);
+      font: var(--text-important-1);
+    }
+
+    .field-help {
+      margin: 4px 0 0;
+      color: var(--color-muted);
+      font: var(--text-body-5);
+    }
+
+    .field-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+
+    .field-action {
+      min-width: 124px;
+      height: 36px;
+      border: 0;
+      border-radius: var(--radius-card);
+      padding: 0 12px;
+      color: var(--color-title);
+      background: #3c3c3c;
+      cursor: pointer;
+      font: var(--text-important-2);
+      text-transform: uppercase;
+    }
+
+    .field-action:hover {
+      background: var(--color-panel-soft);
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 185px;
+      resize: vertical;
+      padding: 18px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-card);
+      background: var(--color-input);
+      color: var(--color-code);
+      font: var(--text-code-2);
+      outline: none;
+      caret-color: var(--color-primary);
+    }
+
+    textarea:focus {
+      border-color: var(--color-text);
+      box-shadow: var(--shadow-focus);
+    }
+
+    .messages {
+      display: grid;
+      gap: 8px;
+      margin: 0 0 14px;
+    }
+
+    .message {
+      min-height: 42px;
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+      margin: 0;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: var(--color-panel-soft);
+      border: 1px solid var(--color-border-soft);
+      color: var(--color-text);
+      font: var(--text-important-2);
+    }
+
+    .message::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      margin-top: 5px;
+      flex: 0 0 7px;
+      border-radius: 999px;
+      background: var(--color-muted);
+      box-shadow: 0 0 0 3px rgba(162, 160, 160, 0.14);
+    }
+
+    .message.success {
+      border-color: rgba(88, 213, 138, 0.42);
+      color: #d7f8df;
+    }
+
+    .message.success::before {
+      background: var(--color-success);
+      box-shadow: 0 0 0 3px rgba(88, 213, 138, 0.18);
+    }
+
+    .message.warning {
+      border-color: rgba(242, 182, 77, 0.44);
+      color: #ffe5a3;
+    }
+
+    .message.warning::before {
+      background: var(--color-warning);
+      box-shadow: 0 0 0 3px rgba(242, 182, 77, 0.18);
+    }
+
+    .message.error {
+      border-color: rgba(255, 102, 115, 0.44);
+      color: #ffc7c7;
+    }
+
+    .message.error::before {
+      background: var(--color-error);
+      box-shadow: 0 0 0 3px rgba(255, 102, 115, 0.18);
+    }
+
+    .meta {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin: 0 0 14px;
+    }
+
+    .meta[hidden] {
+      display: none;
+    }
+
+    .stat {
+      min-width: 0;
+      padding: 11px;
+      border-radius: 10px;
+      background: var(--color-panel-soft);
+      border: 1px solid var(--color-border-soft);
+    }
+
+    .stat span {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--color-muted);
+      font: 700 10px/12px var(--font-base);
+      text-transform: uppercase;
+    }
+
+    .stat strong {
+      display: block;
+      color: var(--color-title);
+      font: var(--text-code-5);
+      overflow-wrap: anywhere;
+    }
+
+    .check-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 26px;
+    }
+
+    .method-card {
+      margin-top: 24px;
+      padding: 28px 30px;
+    }
+
+    .method-title {
+      margin: 0 0 18px;
+      color: var(--color-title);
+      font: var(--text-lead-4);
+    }
+
+    .formula {
+      margin: 0 0 16px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: var(--color-input);
+      border: 1px solid var(--color-border);
+      color: var(--color-code);
+      font: var(--text-code-3);
+      overflow-wrap: anywhere;
+    }
+
+    .step-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .step-row {
+      display: grid;
+      grid-template-columns: 24px 1fr;
+      gap: 10px;
+      align-items: start;
+    }
+
+    .step-index {
+      width: 24px;
+      height: 24px;
+      display: grid;
+      place-items: center;
+      border-radius: 999px;
+      background: var(--color-panel-soft);
+      color: var(--color-title);
+      font: var(--text-important-3);
+      border: 1px solid var(--color-border);
+    }
+
+    .step-copy {
+      margin: 0;
+      color: var(--color-text);
+      font: var(--text-lead-5);
+    }
+
+    .field-notes {
+      margin-top: 18px;
+      padding: 14px;
+      border-radius: var(--radius-card);
+      background: var(--color-panel-soft);
+      border: 1px solid var(--color-border);
+    }
+
+    .field-notes summary {
+      min-height: 38px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      cursor: pointer;
+      list-style: none;
+      color: var(--color-title);
+      font: var(--text-important-2);
+    }
+
+    .field-notes summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .field-notes summary::before {
+      content: "›";
+      color: var(--color-primary);
+      font: 700 14px/1 var(--font-base);
+      transition: transform 0.16s ease;
+    }
+
+    .field-notes[open] summary::before {
+      transform: rotate(90deg);
+    }
+
+    .field-notes-body {
+      padding-top: 8px;
+    }
+
+    .field-note {
+      display: grid;
+      gap: 7px;
+      padding: 10px 0;
+      border-top: 1px solid var(--color-border-soft);
+    }
+
+    .field-note:first-of-type {
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    .field-note:last-child {
+      padding-bottom: 0;
+    }
+
+    .field-note code {
+      width: fit-content;
+      max-width: 100%;
+      display: inline-block;
+      padding: 3px 7px;
+      border-radius: 4px;
+      background: #0f0f0f;
+      color: var(--color-primary);
+      border: 1px solid rgba(200, 242, 64, 0.22);
+      font: var(--text-code-5);
+      overflow-wrap: anywhere;
+    }
+
+    .field-note p {
+      margin: 0;
+      color: var(--color-muted);
+      font: var(--text-body-4);
+    }
+
+    .bottom-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 46px;
+      padding-top: 26px;
+      border-top: 1px solid var(--color-border-soft);
+    }
+
+    .btn {
+      min-width: 130px;
+      height: 36px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-card);
+      padding: 0 12px;
+      cursor: pointer;
+      font: var(--text-important-2);
+      color: var(--color-title);
+      background: var(--color-panel-soft);
+      text-align: center;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      min-width: 160px;
+      height: 44px;
+      border: 0;
+      border-radius: var(--radius-card);
+      padding: 0 12px;
+      background: var(--color-primary);
+      color: var(--color-page);
+      font: var(--text-important-4);
+      clip-path: none;
+    }
+
+    .btn-primary:hover {
+      background: var(--color-primary-hover);
+    }
+
+    .btn-primary:active {
+      background: var(--color-primary-press);
+    }
+
+    .btn-secondary:hover {
+      color: #fff;
+      background: #3c3c3c;
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+    }
+
+    code {
+      color: var(--color-primary);
+      font-family: var(--font-mono);
+    }
+
+    @media (max-width: 720px) {
+      .app-shell {
+        width: min(100% - 24px, var(--page-max));
+        padding-top: 28px;
+      }
+
+      .app-header {
+        gap: 14px;
+        padding-bottom: 28px;
+      }
+
+      .brand-logo {
+        width: 98px;
+        height: auto;
+      }
+
+      .brand-name {
+        font-size: 20px;
+        line-height: 24px;
+      }
+
+      .brand-subtitle {
+        font-size: 13px;
+        line-height: 20px;
+      }
+
+      .page-scroll {
+        padding-top: 30px;
+      }
+
+      .field-head {
+        display: grid;
+      }
+
+      .field-actions {
+        justify-content: space-between;
+      }
+
+      .input-card,
+      .method-card {
+        padding: 20px;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .app-shell {
+        width: min(100% - 18px, var(--page-max));
+      }
+
+      .app-header {
+        align-items: flex-start;
+        padding-bottom: 22px;
+      }
+
+      .brand {
+        align-items: center;
+        flex-wrap: nowrap;
+        gap: 10px;
+      }
+
+      .brand-logo {
+        width: auto;
+        height: 24px;
+        flex: 0 0 auto;
+      }
+
+      .brand-copy {
+        flex: 1 1 auto;
+        min-width: 0;
+      }
+
+      .brand-name {
+        font-size: 18px;
+        line-height: 22px;
+      }
+
+      .page-scroll {
+        padding-top: 24px;
+      }
+
+      .input-card,
+      .method-card {
+        padding: 16px;
+      }
+
+      .field-head {
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+
+      .field-actions {
+        align-items: flex-start;
+      }
+
+      .field-actions {
+        display: flex;
+        justify-content: flex-start;
+      }
+
+      .meta {
+        grid-template-columns: 1fr;
+      }
+
+      textarea {
+        min-height: 320px;
+        font-size: 12px;
+        line-height: 18px;
+      }
+
+      .bottom-bar {
+        display: flex;
+        margin-top: 26px;
+        padding-top: 20px;
+      }
+
+      .check-row {
+        justify-content: stretch;
+      }
+
+      .btn,
+      .btn-primary {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app-shell">
+    <header class="app-header">
+      <div class="brand" aria-label="Cardyes">
+        <img class="brand-logo" src="./logo.svg" alt="Cardyes">
+        <div class="brand-copy">
+          <p class="brand-name">Verify your Rolls</p>
+          <p class="brand-subtitle">Open-source provably fair verification</p>
+        </div>
+      </div>
+    </header>
+
+    <section class="page-scroll" aria-label="Roll validator">
+      <form id="checkForm">
+        <div class="input-card surface-card">
+          <div class="field-head">
+            <div>
+              <label for="rollData">Paste your roll data</label>
+              <p class="field-help">Enter the infinite-v2 proof JSON copied from Cardyes.</p>
+            </div>
+            <div class="field-actions" aria-label="Roll proof actions">
+              <button class="field-action" type="button" id="loadSample">Load sample</button>
+            </div>
+          </div>
+
+          <div id="messages" class="messages" aria-live="polite">
+            <p class="message info">Enter your roll data and click Check.</p>
+          </div>
+
+          <div id="summary" class="meta" hidden>
+            <div class="stat">
+              <span>Original</span>
+              <strong id="originalRoll">-</strong>
+            </div>
+            <div class="stat">
+              <span>Calculated</span>
+              <strong id="calculatedRoll">-</strong>
+            </div>
+            <div class="stat">
+              <span>Algorithm</span>
+              <strong id="algorithmName">infinite-v2</strong>
+            </div>
+          </div>
+
+          <textarea id="rollData" name="rollData" spellcheck="false" autocomplete="off"></textarea>
+          <div class="check-row">
+            <button class="btn btn-primary" type="submit">Check</button>
+          </div>
+        </div>
+      </form>
+
+      <div class="method-card surface-card">
+        <p class="method-title">How to verify</p>
+        <p class="formula">roll = HMAC_SHA256(server_seed, client_seed + ":" + nonce) % 100000000</p>
+        <div class="step-list" aria-label="Verification steps">
+          <div class="step-row">
+            <span class="step-index">1</span>
+            <p class="step-copy">Compare <code>sha256(server_seed)</code> with the public hash.</p>
+          </div>
+          <div class="step-row">
+            <span class="step-index">2</span>
+            <p class="step-copy">Recalculate the roll from the revealed seed, client seed, and nonce.</p>
+          </div>
+          <div class="step-row">
+            <span class="step-index">3</span>
+            <p class="step-copy">Match the calculated roll against the value shown in the opening result.</p>
+          </div>
+        </div>
+        <details class="field-notes" aria-label="Field meanings">
+          <summary>Here's what each field means</summary>
+          <div class="field-notes-body">
+            <div class="field-note">
+              <code>client_seed</code>
+              <p>The client seed is randomly generated by default when you sign up. You can change it to any value you want at any time. The system will remember your last set client seed. You can verify it later using the Unboxing ID.</p>
+            </div>
+            <div class="field-note">
+              <code>server_seed</code>
+              <p>The server seed is hidden by default. This prevents pre-simulation of results. Once the server seed has been used, you can choose to reveal it and verify that it has not been tampered with. A new hidden server seed is then provided for future openings.</p>
+            </div>
+            <div class="field-note">
+              <code>public_hash</code>
+              <p>This value is generated by hashing the server seed. It is published with the roll data and can be used to verify that the server seed was not altered before being revealed.</p>
+            </div>
+            <div class="field-note">
+              <code>nonce</code>
+              <p>This ensures that every opening result is independent and truly random.</p>
+            </div>
+            <div class="field-note">
+              <code>roll</code>
+              <p>The roll is the result claimed by the system. This validator recalculates it from the revealed server seed, client seed, and nonce.</p>
+            </div>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <footer class="bottom-bar">
+      <a class="btn btn-secondary" href="https://github.com/cardyes-com/provably-fair" target="_blank" rel="noreferrer">Source Code</a>
+    </footer>
+  </main>
+
+  <script>
+    const ROLL_MAX = 100000000n;
+    const UINT64_SIZE = 2n ** 64n;
+    const SAMPLE_DATA = {
+      client_seed: "92465d3b1825a2b433a2c7a8e934b7b2",
+      server_seed: "8f163f6bba3f2bcc78adb62aa89d8b7f1946e53ba1badc212bdaedcade0f3d1f",
+      public_hash: "03af7d1789f7bb7fec6c342e9338ac383f8d63f846c1a80aa087b3eff64f7c42",
+      nonce: 0,
+      roll: 81911906
+    };
+
+    const form = document.getElementById("checkForm");
+    const input = document.getElementById("rollData");
+    const messages = document.getElementById("messages");
+    const summary = document.getElementById("summary");
+    const originalRoll = document.getElementById("originalRoll");
+    const calculatedRoll = document.getElementById("calculatedRoll");
+    const algorithmName = document.getElementById("algorithmName");
+    const loadSample = document.getElementById("loadSample");
+
+    input.value = JSON.stringify(SAMPLE_DATA, null, 2);
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      await checkRoll();
+    });
+
+    loadSample.addEventListener("click", () => {
+      input.value = JSON.stringify(SAMPLE_DATA, null, 2);
+      renderMessages([{ type: "info", text: "Sample data loaded." }]);
+      summary.hidden = true;
+    });
+
+    async function checkRoll() {
+      summary.hidden = true;
+
+      let parsed;
+      try {
+        parsed = JSON.parse(input.value.trim());
+      } catch {
+        renderMessages([{ type: "error", text: "Your input is invalid JSON. Paste a JSON object and try again." }]);
+        return;
+      }
+
+      const proof = normalizeProof(parsed);
+      const missing = requiredFields(proof);
+      if (missing.length > 0) {
+        renderMessages([
+          { type: "warning", text: "Missing required field(s): " + missing.join(", ") + "." }
+        ]);
+        return;
+      }
+
+      const notices = [];
+      if (proof.algorithm && proof.algorithm !== "infinite-v2") {
+        notices.push({
+          type: "warning",
+          text: "Algorithm is " + proof.algorithm + ". This page verifies infinite-v2 roll data."
+        });
+      }
+
+      try {
+        const expectedHash = await sha256Hex(proof.serverSeed);
+        const hashMatches = expectedHash.toLowerCase() === String(proof.publicHash).toLowerCase();
+        const rollResult = await computeRoll(proof.serverSeed, proof.clientSeed, proof.nonce);
+        const rollMatches = rollResult.roll === proof.roll;
+
+        originalRoll.textContent = String(proof.roll);
+        calculatedRoll.textContent = String(rollResult.roll);
+        algorithmName.textContent = proof.algorithm || "infinite-v2";
+        summary.hidden = false;
+
+        const resultMessages = [
+          ...notices,
+          {
+            type: rollMatches ? "success" : "error",
+            text: rollMatches
+              ? "Roll values are identical."
+              : "Roll mismatch. Calculated " + rollResult.roll + ", original " + proof.roll + "."
+          }
+        ];
+
+        if (rollMatches) {
+          resultMessages.push({
+            type: "success",
+            text: "Original Roll is " + proof.roll + ". Calculated Roll is " + rollResult.roll + "."
+          });
+        }
+
+        resultMessages.push({
+          type: hashMatches ? "success" : "error",
+          text: hashMatches
+            ? "Public hash matches sha256(server_seed)."
+            : "Public hash mismatch. Expected " + expectedHash + "."
+        });
+
+        if (rollResult.counter > 0) {
+          resultMessages.push({
+            type: "info",
+            text: "Rejection sampling used counter " + rollResult.counter + "."
+          });
+        }
+
+        renderMessages(resultMessages);
+      } catch (error) {
+        renderMessages([{ type: "error", text: "Verification failed: " + error.message }]);
+      }
+    }
+
+    function normalizeProof(data) {
+      return {
+        algorithm: stringOrEmpty(data.algorithm),
+        clientSeed: stringOrEmpty(data.client_seed),
+        serverSeed: stringOrEmpty(data.server_seed),
+        publicHash: stringOrEmpty(data.public_hash),
+        nonce: toInteger(data.nonce),
+        roll: toInteger(data.roll)
+      };
+    }
+
+    function requiredFields(proof) {
+      const missing = [];
+      if (!proof.clientSeed) missing.push("client_seed");
+      if (!proof.serverSeed) missing.push("server_seed");
+      if (!proof.publicHash) missing.push("public_hash");
+      if (!Number.isSafeInteger(proof.nonce) || proof.nonce < 0) missing.push("nonce");
+      if (!Number.isSafeInteger(proof.roll) || proof.roll < 0 || BigInt(proof.roll) >= ROLL_MAX) missing.push("roll");
+      return missing;
+    }
+
+    async function computeRoll(serverSeed, clientSeed, nonce) {
+      const limit = (UINT64_SIZE / ROLL_MAX) * ROLL_MAX;
+      const base = clientSeed + ":" + nonce;
+
+      for (let counter = 0; ; counter += 1) {
+        const message = counter === 0 ? base : base + ":" + counter;
+        const digest = await hmacSha256(serverSeed, message);
+        const value = bigEndianUint64(digest);
+        if (value < limit) {
+          return {
+            roll: Number(value % ROLL_MAX),
+            counter
+          };
+        }
+      }
+    }
+
+    async function hmacSha256(keyText, messageText) {
+      const encoder = new TextEncoder();
+      const key = await crypto.subtle.importKey(
+        "raw",
+        encoder.encode(keyText),
+        { name: "HMAC", hash: "SHA-256" },
+        false,
+        ["sign"]
+      );
+      return new Uint8Array(await crypto.subtle.sign("HMAC", key, encoder.encode(messageText)));
+    }
+
+    async function sha256Hex(value) {
+      const bytes = new TextEncoder().encode(value);
+      const digest = new Uint8Array(await crypto.subtle.digest("SHA-256", bytes));
+      return bytesToHex(digest);
+    }
+
+    function bigEndianUint64(bytes) {
+      let value = 0n;
+      for (let index = 0; index < 8; index += 1) {
+        value = (value << 8n) | BigInt(bytes[index]);
+      }
+      return value;
+    }
+
+    function bytesToHex(bytes) {
+      return Array.from(bytes, byte => byte.toString(16).padStart(2, "0")).join("");
+    }
+
+    function toInteger(value) {
+      if (typeof value === "number" && Number.isInteger(value)) return value;
+      if (typeof value === "string" && value.trim() !== "" && /^-?\d+$/.test(value.trim())) {
+        const parsed = Number(value);
+        return Number.isSafeInteger(parsed) ? parsed : NaN;
+      }
+      return NaN;
+    }
+
+    function stringOrEmpty(value) {
+      return typeof value === "string" ? value.trim() : "";
+    }
+
+    function renderMessages(items) {
+      messages.innerHTML = "";
+      for (const item of items) {
+        const node = document.createElement("p");
+        node.className = "message " + item.type;
+        node.textContent = item.text;
+        messages.appendChild(node);
+      }
+    }
+  </script>
+</body>
+</html>
