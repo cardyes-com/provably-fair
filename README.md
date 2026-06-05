@@ -1,6 +1,6 @@
 # Cardyes Provably Fair Validator
 
-Independently verify that your Cardyes infinite-v2 roll was provably fair. Paste
+Independently verify that your Cardyes infinite roll was provably fair. Paste
 the roll data into the page and the validator recalculates the public hash and
 roll locally in your browser.
 
@@ -15,7 +15,7 @@ No login, server, PHP runtime, or network request is required.
 
 ## What this verifies
 
-This page verifies the current `infinite-v2` roll proof copied from Cardyes:
+This page verifies the current `infinite` roll proof copied from Cardyes:
 
 - `client_seed`
 - `server_seed`
@@ -38,7 +38,7 @@ uint64 and applies rejection sampling before modulo reduction.
 Open the file directly:
 
 ```text
-fairness-validator/index.html
+index.html
 ```
 
 Or host the folder on any static file server, GitHub Pages, Cloudflare Pages,
