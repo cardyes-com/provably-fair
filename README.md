@@ -58,7 +58,7 @@ Replit, or similar static hosting service.
 
 ## Notes
 
-This validator only verifies the copied `infinite-v2` roll proof. It does
+This validator only verifies the copied `infinite` roll proof. It does
 not verify card pool selection, picked positions, or drawn card metadata because
 those fields are not included in the input format.
 

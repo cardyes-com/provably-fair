@@ -709,10 +709,6 @@
               <span>Calculated</span>
               <strong id="calculatedRoll">-</strong>
             </div>
-            <div class="stat">
-              <span>Algorithm</span>
-              <strong id="algorithmName">infinite-v2</strong>
-            </div>
           </div>
 
           <textarea id="rollData" name="rollData" spellcheck="false" autocomplete="off"></textarea>
@@ -793,7 +789,6 @@
     const summary = document.getElementById("summary");
     const originalRoll = document.getElementById("originalRoll");
     const calculatedRoll = document.getElementById("calculatedRoll");
-    const algorithmName = document.getElementById("algorithmName");
     const loadSample = document.getElementById("loadSample");
 
     input.placeholder = JSON.stringify(PLACEHOLDER_DATA, null, 2);
@@ -850,14 +845,6 @@
         return;
       }
 
-      const notices = [];
-      if (proof.algorithm && proof.algorithm !== "infinite-v2") {
-        notices.push({
-          type: "warning",
-          text: "Algorithm is " + proof.algorithm + ". This page verifies infinite-v2 roll data."
-        });
-      }
-
       try {
         const expectedHash = await sha256Hex(proof.serverSeed);
         const hashMatches = expectedHash.toLowerCase() === String(proof.publicHash).toLowerCase();
@@ -866,11 +853,9 @@
 
         originalRoll.textContent = String(proof.roll);
         calculatedRoll.textContent = String(rollResult.roll);
-        algorithmName.textContent = proof.algorithm || "infinite-v2";
         summary.hidden = false;
 
         const resultMessages = [
-          ...notices,
           {
             type: rollMatches ? "success" : "error",
             text: rollMatches
@@ -908,7 +893,6 @@
 
     function normalizeProof(data) {
       return {
-        algorithm: stringOrEmpty(data.algorithm),
         clientSeed: stringOrEmpty(data.client_seed),
         serverSeed: stringOrEmpty(data.server_seed),
         publicHash: stringOrEmpty(data.public_hash),
