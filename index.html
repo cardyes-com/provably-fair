@@ -651,7 +651,7 @@
       }
 
       textarea {
-        min-height: 320px;
+        min-height: 260px;
         font-size: 12px;
         line-height: 18px;
       }
@@ -779,6 +779,13 @@
       nonce: 0,
       roll: 81911906
     };
+    const PLACEHOLDER_DATA = {
+      client_seed: "...",
+      server_seed: "...",
+      public_hash: "...",
+      nonce: "...",
+      roll: "..."
+    };
 
     const form = document.getElementById("checkForm");
     const input = document.getElementById("rollData");
@@ -789,11 +796,24 @@
     const algorithmName = document.getElementById("algorithmName");
     const loadSample = document.getElementById("loadSample");
 
-    input.value = JSON.stringify(SAMPLE_DATA, null, 2);
+    input.placeholder = JSON.stringify(PLACEHOLDER_DATA, null, 2);
 
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
       await checkRoll();
+    });
+
+    input.addEventListener("paste", (event) => {
+      const pastedText = event.clipboardData?.getData("text");
+      if (!pastedText) return;
+
+      try {
+        const parsed = JSON.parse(pastedText.trim());
+        event.preventDefault();
+        input.value = JSON.stringify(parsed, null, 2);
+      } catch {
+        // Keep the browser's default paste behavior for non-JSON text.
+      }
     });
 
     loadSample.addEventListener("click", () => {
@@ -814,10 +834,18 @@
       }
 
       const proof = normalizeProof(parsed);
-      const missing = requiredFields(proof);
+      const missing = missingRequiredFields(parsed);
       if (missing.length > 0) {
         renderMessages([
           { type: "warning", text: "Missing required field(s): " + missing.join(", ") + "." }
+        ]);
+        return;
+      }
+
+      const invalid = invalidFields(proof);
+      if (invalid.length > 0) {
+        renderMessages([
+          { type: "warning", text: "Invalid field(s): " + invalid.join("; ") + "." }
         ]);
         return;
       }
@@ -889,14 +917,30 @@
       };
     }
 
-    function requiredFields(proof) {
+    function missingRequiredFields(data) {
       const missing = [];
-      if (!proof.clientSeed) missing.push("client_seed");
-      if (!proof.serverSeed) missing.push("server_seed");
-      if (!proof.publicHash) missing.push("public_hash");
-      if (!Number.isSafeInteger(proof.nonce) || proof.nonce < 0) missing.push("nonce");
-      if (!Number.isSafeInteger(proof.roll) || proof.roll < 0 || BigInt(proof.roll) >= ROLL_MAX) missing.push("roll");
+      if (!hasRequiredValue(data.client_seed)) missing.push("client_seed");
+      if (!hasRequiredValue(data.server_seed)) missing.push("server_seed");
+      if (!hasRequiredValue(data.public_hash)) missing.push("public_hash");
+      if (!hasRequiredValue(data.nonce)) missing.push("nonce");
+      if (!hasRequiredValue(data.roll)) missing.push("roll");
       return missing;
+    }
+
+    function invalidFields(proof) {
+      const invalid = [];
+      if (!proof.clientSeed) invalid.push("client_seed must be a non-empty string");
+      if (!proof.serverSeed) invalid.push("server_seed must be a non-empty string");
+      if (!proof.publicHash) invalid.push("public_hash must be a non-empty string");
+      if (!Number.isSafeInteger(proof.nonce) || proof.nonce < 0) invalid.push("nonce must be a non-negative integer");
+      if (!Number.isSafeInteger(proof.roll) || proof.roll < 0 || BigInt(proof.roll) >= ROLL_MAX) {
+        invalid.push("roll must be an integer from 0 to " + String(ROLL_MAX - 1n));
+      }
+      return invalid;
+    }
+
+    function hasRequiredValue(value) {
+      return value !== undefined && value !== null && !(typeof value === "string" && value.trim() === "");
     }
 
     async function computeRoll(serverSeed, clientSeed, nonce) {
