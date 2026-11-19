@@ -100,6 +100,9 @@ const BoosterVerifier = (() => {
     requireThat(object(order) && text(order.drawOrderId) && text(order.boosterId) && integer(order.version, 1) &&
       integer(order.requestedQty, 1, 20) && integer(order.completedQty, 1, order.requestedQty) &&
       integer(order.cardsPerPack, 1, 50) && hexHash(order.rulesHash), "The order result is invalid.");
+    requireThat(order.status === "completed" || order.status === "cancelled", "The order is not ready for verification.");
+    requireThat(order.status !== "completed" || order.completedQty === order.requestedQty,
+      "The completed order is missing purchased packs.");
     const count = scope === "pack" ? 1 : order.completedQty;
     requireThat(Array.isArray(proofs) && proofs.length === count && Array.isArray(order.packs) && order.packs.length === count,
       "The export must contain a proof and a result for every included pack.");
@@ -158,6 +161,7 @@ const BoosterVerifier = (() => {
       requireThat(proof.clientSeed === first.clientSeed && proof.serverSeedHash === first.serverSeedHash,
         label + " does not use the same seed commitment.");
       requireThat(typeof proof.serverSeedRevealed === "boolean", label + " has an invalid reveal status.");
+      requireThat(proof.serverSeedRevealed || proof.serverSeed === undefined, label + " contains an unrevealed seed.");
       if (proof.serverSeedRevealed) {
         requireThat(text(proof.serverSeed), label + " is missing the revealed seed.");
         if (!key) {
