@@ -158,6 +158,64 @@
       padding: 42px 0 0;
     }
 
+    .proof-nav {
+      display: flex;
+      gap: 8px;
+      margin: 22px 0 0;
+    }
+
+    .proof-nav a {
+      display: inline-flex;
+      min-height: 38px;
+      align-items: center;
+      padding: 0 14px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-pill);
+      color: var(--color-text);
+      font: var(--text-important-2);
+      text-decoration: none;
+    }
+
+    .proof-nav a[aria-current] {
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+      background: rgba(200, 242, 64, 0.08);
+    }
+
+    .proof-nav + .page-scroll,
+    #booster-panel {
+      padding-top: 16px;
+    }
+
+    .pack-results {
+      margin-top: 14px;
+    }
+
+    .pack-result {
+      padding: 10px 12px;
+      border-top: 1px solid var(--color-border);
+      font: var(--text-body-4);
+    }
+
+    .pack-result summary {
+      color: var(--color-title);
+      cursor: pointer;
+      font: var(--text-important-2);
+    }
+
+    .pack-result table {
+      margin-top: 8px;
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    .pack-result th,
+    .pack-result td {
+      padding: 4px 0;
+      border-bottom: 1px solid var(--color-border-soft);
+    }
+
     .surface-card {
       border-radius: var(--radius-card);
       background: var(--color-panel);
@@ -683,7 +741,12 @@
       </div>
     </header>
 
-    <section class="page-scroll" aria-label="Roll validator">
+    <nav class="proof-nav" aria-label="Verification mode">
+      <a id="infinite-link" href="#infinite" aria-controls="infinite-panel" aria-current="location">Infinite</a>
+      <a id="booster-link" href="#booster" aria-controls="booster-panel">Booster Pack</a>
+    </nav>
+
+    <section id="infinite-panel" class="page-scroll" aria-label="Infinite roll validator">
       <form id="checkForm">
         <div class="input-card surface-card">
           <div class="field-head">
@@ -763,6 +826,36 @@
       </div>
     </section>
 
+    <section id="booster-panel" class="page-scroll" aria-label="Booster pack rarity validator" hidden>
+      <form id="booster-form">
+        <div class="input-card surface-card">
+          <div class="field-head">
+            <div>
+              <label for="booster-data">Single pack or order proof</label>
+              <p class="field-help" id="booster-help">Copy the proof from Cardyes or open the exported JSON file.</p>
+            </div>
+            <div class="field-actions">
+              <button class="field-action" id="booster-file-button" type="button">Open JSON</button>
+              <input id="booster-file" type="file" accept=".json,application/json" hidden>
+            </div>
+          </div>
+          <div class="messages" aria-live="polite">
+            <p class="message info" id="booster-status">Ready to check slot rarities.</p>
+          </div>
+          <textarea id="booster-data" aria-describedby="booster-help" spellcheck="false" autocomplete="off"></textarea>
+          <div class="check-row">
+            <button class="btn btn-primary" id="booster-check" type="submit">Verify slot rarities</button>
+          </div>
+          <div class="pack-results" id="booster-results" hidden></div>
+        </div>
+      </form>
+
+      <div class="method-card surface-card">
+        <p class="method-title">How booster verification works</p>
+        <p class="step-copy">Reveal the server seed in Cardyes, then copy the updated proof. The verifier recalculates each slot's roll and rarity in this browser.</p>
+        <p class="step-copy">The proof covers slot rarities. Card numbers and variants are assigned separately.</p>
+      </div>
+    </section>
   </main>
 
   <script>
@@ -997,5 +1090,7 @@
       }
     }
   </script>
+  <script src="./booster-verifier.js" defer></script>
+  <script src="./booster-page.js" defer></script>
 </body>
 </html>

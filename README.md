@@ -1,19 +1,18 @@
 # Cardyes Provably Fair Validator
 
-Independently verify that your Cardyes infinite roll was provably fair. Paste
-the roll data into the page and the validator recalculates the public hash and
-roll locally in your browser.
+Verify Cardyes Infinite rolls and Booster Pack slot rarities in your browser.
+Paste the proof into the matching tab and run verification locally.
 
 No login, server, PHP runtime, or network request is required.
 
 ## How to use
 
-1. Open `index.html` in a browser.
+1. Open `index.html` in a browser and select **Infinite** or **Booster Pack**.
 2. Copy the roll proof JSON from Cardyes, including the `{ }`.
 3. Paste it into the input box and click **Check**.
 4. Green messages mean the public hash and roll match.
 
-## What this verifies
+## Infinite
 
 This page verifies the current `infinite` roll proof copied from Cardyes:
 
@@ -56,11 +55,18 @@ Replit, or similar static hosting service.
 }
 ```
 
-## Notes
+## Booster Pack
 
-This validator only verifies the copied `infinite` roll proof. It does
-not verify card pool selection, picked positions, or drawn card metadata because
-those fields are not included in the input format.
+Open `#booster` and paste a single pack proof or import an order export
+using the `cardyes-booster-rarity-v1` schema. The verifier hashes the exact
+`rulesJson` string and recalculates the roll and rarity of each slot using
+`hmac-sha256-booster-rarity-v1`. A proof without the revealed seed shows
+**Awaiting server seed reveal**. With a pre-purchase record, the verifier
+also checks the original rules hash, seed commitment and slot nonces.
+The result describes slot rarity verification. Card numbers and variants
+are assigned separately.
+
+Run the Booster Pack verifier tests with `node --test tests/booster.test.cjs`.
 
 ## Source
 
