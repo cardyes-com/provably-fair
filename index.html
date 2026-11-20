@@ -158,7 +158,7 @@
       padding: 42px 0 0;
     }
 
-    .proof-nav {
+    .proof-nav:not([hidden]) {
       display: inline-flex;
       gap: 4px;
       margin-top: 22px;
@@ -190,7 +190,7 @@
       color: var(--color-page);
     }
 
-    .proof-nav ~ .page-scroll {
+    .proof-nav:not([hidden]) ~ .page-scroll {
       padding-top: 16px;
     }
 
@@ -733,12 +733,12 @@
       </div>
     </header>
 
-    <nav class="proof-nav" aria-label="Proof type">
+    <nav id="proof-nav" class="proof-nav" aria-label="Proof type" hidden>
       <a id="packs-link" href="#packs" aria-controls="packs-panel" aria-current="location">Packs</a>
       <a id="boosters-link" href="#boosters" aria-controls="boosters-panel">Boosters</a>
     </nav>
 
-    <section id="packs-panel" class="page-scroll" aria-label="Packs validator">
+    <section id="packs-panel" class="page-scroll" aria-label="Roll validator">
       <form id="checkForm">
         <div class="input-card surface-card">
           <div class="field-head">
@@ -1167,7 +1167,15 @@
       }
     }
   </script>
-  <script src="./booster-verifier.js" defer></script>
-  <script src="./booster-preview.js" defer></script>
+  <script>
+    if (location.pathname === "/preview") {
+      for (const source of ["./booster-verifier.js", "./booster-preview.js"]) {
+        const script = document.createElement("script");
+        script.src = source;
+        script.async = false;
+        document.body.appendChild(script);
+      }
+    }
+  </script>
 </body>
 </html>

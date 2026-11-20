@@ -65,6 +65,7 @@
 
   window.addEventListener("hashchange", selectProofType);
   selectProofType();
+  document.getElementById("proof-nav").hidden = false;
 
   input.addEventListener("input", clearFeedback);
 
