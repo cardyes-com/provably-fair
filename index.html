@@ -158,6 +158,56 @@
       padding: 42px 0 0;
     }
 
+    .proof-nav:not([hidden]) {
+      display: inline-flex;
+      gap: 4px;
+      margin-top: 22px;
+      padding: 4px;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-card);
+      background: var(--color-panel-soft);
+    }
+
+    .proof-nav a {
+      display: inline-flex;
+      min-height: 36px;
+      min-width: 92px;
+      align-items: center;
+      justify-content: center;
+      padding: 0 14px;
+      border-radius: var(--radius-pill);
+      color: var(--color-text);
+      font: var(--text-important-2);
+      text-decoration: none;
+    }
+
+    .proof-nav a:hover {
+      background: var(--color-panel);
+    }
+
+    .proof-nav a[aria-current="location"] {
+      background: var(--color-primary);
+      color: var(--color-page);
+    }
+
+    .proof-nav:not([hidden]) ~ .page-scroll {
+      padding-top: 16px;
+    }
+
+    #booster-data {
+      display: block;
+      min-height: 260px;
+      color-scheme: dark;
+    }
+
+    .meta.booster-results {
+      margin: 20px 0 0;
+    }
+
+    .booster-results .stat strong {
+      font: var(--text-important-1);
+    }
+
     .surface-card {
       border-radius: var(--radius-card);
       background: var(--color-panel);
@@ -683,7 +733,12 @@
       </div>
     </header>
 
-    <section class="page-scroll" aria-label="Roll validator">
+    <nav id="proof-nav" class="proof-nav" aria-label="Proof type" hidden>
+      <a id="packs-link" href="#packs" aria-controls="packs-panel" aria-current="location">Packs</a>
+      <a id="boosters-link" href="#boosters" aria-controls="boosters-panel">Boosters</a>
+    </nav>
+
+    <section id="packs-panel" class="page-scroll" aria-label="Roll validator">
       <form id="checkForm">
         <div class="input-card surface-card">
           <div class="field-head">
@@ -757,6 +812,121 @@
             <div class="field-note">
               <code>roll</code>
               <p>The roll is the result claimed by the system. This validator recalculates it from the revealed server seed, client seed, and nonce.</p>
+            </div>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <!-- Booster card slot proof prototype. -->
+    <section id="boosters-panel" class="page-scroll" aria-label="Boosters validator" hidden>
+      <form id="booster-form">
+        <div class="input-card surface-card">
+          <div class="field-head">
+            <div>
+              <label for="booster-data">Paste your card slot proof</label>
+              <p class="field-help" id="booster-help">Reveal the server seed in Cardyes, then copy the JSON for one Booster card slot.</p>
+            </div>
+            <div class="field-actions">
+              <button class="field-action" type="button" id="load-booster-sample">Load sample</button>
+            </div>
+          </div>
+
+          <textarea id="booster-data" aria-describedby="booster-help" spellcheck="false" autocomplete="off"></textarea>
+          <div class="check-row">
+            <button class="btn btn-primary" type="submit" id="booster-check">Check</button>
+          </div>
+        </div>
+      </form>
+
+      <div aria-live="polite">
+        <div class="method-card surface-card" id="booster-feedback" hidden>
+          <p class="message info" id="booster-status"></p>
+          <div class="meta booster-results" id="booster-results" hidden>
+            <div class="stat">
+              <span>Card slot</span>
+              <strong id="booster-result-slot"></strong>
+            </div>
+            <div class="stat">
+              <span id="booster-result-roll-label">Calculated roll</span>
+              <strong id="booster-result-roll"></strong>
+            </div>
+            <div class="stat">
+              <span>Rarity</span>
+              <strong id="booster-result-rarity"></strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="method-card surface-card">
+        <p class="method-title">How to verify</p>
+        <p class="formula">digest = HMAC_SHA256(serverSeed, "booster:v1:" + clientSeed + ":" + nonce)</p>
+        <div class="step-list" aria-label="Verification steps">
+          <div class="step-row">
+            <span class="step-index">1</span>
+            <p class="step-copy">Use SHA-256 to check the revealed <code>serverSeed</code> against <code>serverSeedHash</code> and the original <code>rulesJson</code> against <code>rulesHash</code>.</p>
+          </div>
+          <div class="step-row">
+            <span class="step-index">2</span>
+            <p class="step-copy">
+              Read the first eight digest bytes as a big-endian unsigned 64-bit integer <code>x</code>.
+              With <code>M = 2^64 − 1</code>, retry when <code>x ≥ M − (M % 100000000)</code> by appending
+              <code>:1</code>, <code>:2</code>, and so on to the original message.
+              For an accepted value, the roll is <code>x % 100000000</code>.
+            </p>
+          </div>
+          <div class="step-row">
+            <span class="step-index">3</span>
+            <p class="step-copy">
+              Sort the weights for <code>slotNo</code> lexicographically by rarity code.
+              Accumulate the weights from zero into half-open intervals <code>[start, end)</code>.
+              Use the interval containing the roll to get its rarity, then compare both values with the proof.
+            </p>
+          </div>
+        </div>
+        <details class="field-notes" aria-label="Field meanings">
+          <summary>Here's what each field means</summary>
+          <div class="field-notes-body">
+            <div class="field-note">
+              <code>slotNo</code>
+              <p>The card slot number, starting at 1. It selects the rarity weights for that slot.</p>
+            </div>
+            <div class="field-note">
+              <code>nonce</code>
+              <p>The slot's nonce as a decimal string. The roll calculation uses its exact value.</p>
+            </div>
+            <div class="field-note">
+              <code>roll</code>
+              <p>The recorded roll for the slot, checked against the recalculated roll.</p>
+            </div>
+            <div class="field-note">
+              <code>rarity</code>
+              <p>The recorded rarity code, checked against the roll and the slot's weights.</p>
+            </div>
+            <div class="field-note">
+              <code>clientSeed</code>
+              <p>The client seed included in the HMAC message.</p>
+            </div>
+            <div class="field-note">
+              <code>serverSeed</code>
+              <p>The revealed server seed used as the HMAC-SHA256 key.</p>
+            </div>
+            <div class="field-note">
+              <code>serverSeedHash</code>
+              <p>The committed SHA-256 hash checked against the revealed server seed.</p>
+            </div>
+            <div class="field-note">
+              <code>rulesHash</code>
+              <p>The committed SHA-256 hash of the original rules text.</p>
+            </div>
+            <div class="field-note">
+              <code>rulesJson</code>
+              <p>The original JSON string containing each slot's rarity weights. The hash check uses its exact text.</p>
+            </div>
+            <div class="field-note">
+              <code>serverSeedRevealed: false</code>
+              <p>The server seed is still hidden. Reveal the seed in Cardyes and copy the updated proof to recalculate the roll.</p>
             </div>
           </div>
         </details>
@@ -994,6 +1164,16 @@
         node.className = "message " + item.type;
         node.textContent = item.text;
         messages.appendChild(node);
+      }
+    }
+  </script>
+  <script>
+    if (location.pathname === "/preview") {
+      for (const source of ["./booster-verifier.js", "./booster-preview.js"]) {
+        const script = document.createElement("script");
+        script.src = source;
+        script.async = false;
+        document.body.appendChild(script);
       }
     }
   </script>
